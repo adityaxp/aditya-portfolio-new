@@ -29,7 +29,7 @@ export default function Hero() {
             <div className="relative">
               <div className="relative h-72 w-72 overflow-hidden rounded-full ring-1 ring-ink-black/10 md:h-80 md:w-80">
                 <Image
-                  src="/aditya-balsane.jpeg"
+                  src="/aditya-balsane.png"
                   alt="Aditya Balsane portrait"
                   fill
                   sizes="(max-width: 768px) 288px, 320px"
