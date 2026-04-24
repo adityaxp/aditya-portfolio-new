@@ -6,9 +6,9 @@ export const siteConfig = {
   url: "https://adityabalasne.com",
   email: "adityabalsane.devmail@gmail.com",
   socials: {
-    github: "https://github.com/aditya",
-    linkedin: "https://linkedin.com/in/aditya",
-    twitter: "https://twitter.com/aditya",
+    github: "https://github.com/adityaxp",
+    linkedin: "https://www.linkedin.com/in/adityabalsane/",
+    twitter: "https://twitter.com",
   },
 } as const;
 
