@@ -1,25 +1,30 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
-import {
-  fadeUp,
-  staggerContainer,
-  staggerItem,
-  scaleIn,
-} from "@/lib/animations";
+import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 import SectionWrapper from "@/components/ui/SectionWrapper";
-import EyebrowLabel from "@/components/ui/EyebrowLabel";
 import GhostText from "@/components/ui/GhostText";
-import SatelliteCTA from "@/components/ui/SatelliteCTA";
-import OrbitalArc from "@/components/ui/OrbitalArc";
 import { projects } from "@/lib/constants";
+import EyebrowLabel from "@/components/ui/EyebrowLabel";
 
-const gradients = [
-  "linear-gradient(135deg, #CF4500 0%, #F37338 60%, #FFB088 100%)",
-  "linear-gradient(135deg, #141413 0%, #3860BE 60%, #6B8DD6 100%)",
-  "linear-gradient(135deg, #9A3A0A 0%, #CF4500 50%, #F37338 100%)",
-  "linear-gradient(135deg, #262627 0%, #555555 60%, #696969 100%)",
-];
+function projectHasLink(link: string) {
+  const trimmed = link.trim();
+  return trimmed.length > 0 && trimmed !== "#";
+}
+
+function linkIsExternal(href: string) {
+  return href.startsWith("http");
+}
+
+const projectCardMediaStillClass = "h-full w-full object-cover object-center";
+const projectCardMediaHoverClass = "h-full w-full object-contain object-center";
+
+const projectCardInteractiveClass =
+  "group/card focus-visible:ring-light-orange flex h-full flex-col overflow-hidden rounded-xl border border-ink-black/[0.08] bg-lifted-cream text-left shadow-[0_1px_0_rgba(20,20,19,0.05)] outline-none transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-ink-black/15 hover:shadow-[0_16px_40px_-20px_rgba(20,20,19,0.14)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas-cream";
+
+const projectCardDisabledClass =
+  "group/card flex h-full cursor-default flex-col overflow-hidden rounded-xl border border-ink-black/[0.06] bg-lifted-cream/90 text-left shadow-none";
 
 export default function Projects() {
   return (
@@ -30,97 +35,130 @@ export default function Projects() {
       />
 
       <div className="relative z-10">
-        <motion.div variants={fadeUp} className="mb-20 max-w-2xl">
-          <h2 className="mt-4 text-[clamp(2rem,5vw,2.25rem)] font-medium leading-[1.2] tracking-[-0.02em] text-ink-black">
-            Projects built with care, shipped with confidence.
+        <motion.header variants={fadeUp} className="mb-14 md:mb-20">
+          <motion.div variants={fadeUp}>
+            <div className="flex justify-start">
+              <EyebrowLabel text="PERSONAL PROJECTS" />
+            </div>
+          </motion.div>
+
+          <h2 className="mt-4 max-w-2xl text-[clamp(2rem,5vw,2.25rem)] font-medium leading-[1.2] tracking-[-0.02em] text-ink-black">
+            A few things I’ve been tinkering with recently
           </h2>
-        </motion.div>
+        </motion.header>
 
-        <motion.div
+        <motion.ul
           variants={staggerContainer}
-          className="grid gap-16 md:gap-24"
+          className="m-0 mx-auto grid max-w-4xl list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2 sm:gap-6 lg:max-w-5xl lg:gap-7"
         >
-          {projects.map((project, i) => (
-            <motion.div
-              key={project.title}
-              variants={staggerItem}
-              className={`group grid items-center gap-10 md:grid-cols-12 md:gap-16 ${
-                i % 2 === 1 ? "md:direction-rtl" : ""
-              }`}
-            >
-              {/* Circular portrait */}
-              <div
-                className={`relative md:col-span-5 ${
-                  i % 2 === 1 ? "md:col-start-8" : "md:col-start-1"
-                }`}
-              >
-                <motion.div
-                  variants={scaleIn}
-                  className="relative mx-auto aspect-square w-full max-w-xs"
-                >
-                  <div
-                    className="h-full w-full rounded-full"
-                    style={{ background: gradients[i % gradients.length] }}
-                  />
-                  <div className="absolute bottom-2 right-2">
-                    <SatelliteCTA href={project.link} />
-                  </div>
-                </motion.div>
-                {/* Orbital arc between items */}
+          {projects.map((project, i) => {
+            const hasHover =
+              "imageHover" in project && Boolean(project.imageHover);
+            const isLinked = projectHasLink(project.link);
+            const external = isLinked && linkIsExternal(project.link);
+            const cardClass = isLinked
+              ? projectCardInteractiveClass
+              : projectCardDisabledClass;
 
-                <div className="hidden md:block">
-                  <OrbitalArc
-                    width={300}
-                    height={120}
-                    direction={i % 2 === 0 ? "right" : "left"}
-                    className={`absolute -bottom-16 ${
-                      i % 2 === 0 ? "-right-40" : "-left-32"
+            const cardBody = (
+              <>
+                <div className="relative aspect-[2/1] w-full shrink-0 overflow-hidden bg-[#0a0a0a]">
+                  <span
+                    className="pointer-events-none absolute left-3 top-3 z-10 font-mono text-[10px] font-medium tabular-nums tracking-widest text-white/45"
+                    aria-hidden
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <Image
+                    src={project.image}
+                    alt={`${project.title} preview`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 45vw, 360px"
+                    className={`${projectCardMediaStillClass} transition-opacity duration-500 ease-out ${
+                      hasHover ? "opacity-100 group-hover/card:opacity-0" : ""
                     }`}
                   />
+                  {hasHover ? (
+                    <Image
+                      src={project.imageHover}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 45vw, 360px"
+                      className={`${projectCardMediaHoverClass} opacity-0 transition-opacity duration-500 ease-out group-hover/card:opacity-100`}
+                      unoptimized
+                    />
+                  ) : null}
+                  <div
+                    className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-80"
+                    aria-hidden
+                  />
                 </div>
-              </div>
 
-              {/* Content */}
-              <div
-                className={`md:col-span-6 ${
-                  i % 2 === 1
-                    ? "md:col-start-1 md:row-start-1"
-                    : "md:col-start-7"
-                }`}
-                style={{ direction: "ltr" }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-light-orange" />
-                  <span className="text-sm font-bold uppercase tracking-[0.04em] text-slate-gray">
-                    {project.category}
+                <div className="flex flex-1 flex-col p-4 md:p-5">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block h-1 w-1 shrink-0 rounded-full bg-light-orange" />
+                    <span className="text-[11px] font-bold uppercase tracking-[0.06em] text-slate-gray">
+                      {project.category}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 text-lg font-medium tracking-[-0.02em] text-ink-black md:text-xl">
+                    {project.title}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-granite md:text-[0.9375rem]">
+                    {project.description}
+                  </p>
+                  <span
+                    className={`mt-4 inline-flex items-center gap-2 text-sm font-semibold text-light-orange`}
+                  >
+                    {isLinked ? "View details" : "Coming soon"}
+                    {isLinked ? (
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 20 20"
+                        fill="none"
+                        className="transition-transform duration-300 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5"
+                        aria-hidden
+                      >
+                        <path
+                          d="M5 15L15 5M15 5H8M15 5V12"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    ) : null}
                   </span>
                 </div>
-                <h3 className="mt-3 text-2xl font-medium tracking-[-0.02em] text-ink-black md:text-3xl">
-                  {project.title}
-                </h3>
-                <p className="mt-3 text-base leading-relaxed text-granite">
-                  {project.description}
-                </p>
-                <motion.a
-                  href={project.link}
-                  className="mt-6 inline-flex items-center gap-2 text-base font-medium text-ink-black transition-colors hover:text-light-orange"
-                  whileHover={{ x: 4 }}
-                >
-                  View Project
-                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
-                    <path
-                      d="M5 15L15 5M15 5H8M15 5V12"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </motion.a>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+              </>
+            );
+
+            return (
+              <motion.li
+                key={project.title}
+                variants={staggerItem}
+                className="min-w-0"
+              >
+                {isLinked ? (
+                  <a
+                    href={project.link}
+                    {...(external
+                      ? { target: "_blank", rel: "noopener noreferrer" }
+                      : {})}
+                    className={cardClass}
+                  >
+                    {cardBody}
+                  </a>
+                ) : (
+                  <article className={cardClass} aria-disabled="true">
+                    {cardBody}
+                  </article>
+                )}
+              </motion.li>
+            );
+          })}
+        </motion.ul>
       </div>
     </SectionWrapper>
   );
