@@ -78,8 +78,9 @@ export default function Hero() {
               className="mt-8 flex flex-wrap items-center justify-center gap-2.5 md:justify-start md:gap-4"
             >
               <motion.a
-                href="/cv.pdf"
-                download
+                href={siteConfig.cv}
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="inline-flex min-h-11 items-center gap-2.5 rounded-[999px] bg-ink-black px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em] text-canvas-cream md:min-h-12 md:px-7 md:text-sm"
