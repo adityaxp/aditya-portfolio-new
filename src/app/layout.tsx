@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Sofia_Sans } from "next/font/google";
+import { siteConfig } from "@/lib/constants";
 import "./globals.css";
 
 const sofiaSans = Sofia_Sans({
@@ -10,14 +11,13 @@ const sofiaSans = Sofia_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Aditya — Portfolio",
-  description:
-    "Crafting digital experiences through precision design and thoughtful engineering.",
-  metadataBase: new URL("https://aditya.dev"),
+  title: siteConfig.title,
+  description: siteConfig.description,
+  keywords: [...siteConfig.keywords],
+  metadataBase: new URL(siteConfig.url),
   openGraph: {
-    title: "Aditya — Portfolio",
-    description:
-      "Crafting digital experiences through precision design and thoughtful engineering.",
+    title: siteConfig.title,
+    description: siteConfig.description,
     type: "website",
   },
 };
@@ -28,8 +28,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sofiaSans.variable} antialiased`} suppressHydrationWarning>
-      <body className="min-h-screen bg-canvas-cream font-sans text-ink-black" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${sofiaSans.variable} antialiased`}
+      suppressHydrationWarning
+    >
+      <body
+        className="min-h-screen bg-canvas-cream font-sans text-ink-black"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>
