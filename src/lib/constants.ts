@@ -1,15 +1,46 @@
+import {
+  lawSage,
+  lawSageHover,
+  p2pChat,
+  p2pChatHover,
+  raspiCarV2,
+  raspiCarV2Hover,
+  ravenUAV,
+  ravenUAVHover,
+} from "../../assets";
+
 export const siteConfig = {
   name: "Aditya Balsane",
   title: "Aditya Balsane",
   description:
     "Crafting digital experiences through precision design and thoughtful engineering.",
-  url: "https://adityabalasne.com",
+  url: "https://www.adityabalsane.com",
   email: "adityabalsane.devmail@gmail.com",
   socials: {
     github: "https://github.com/adityaxp",
     linkedin: "https://www.linkedin.com/in/adityabalsane/",
     twitter: "https://twitter.com",
   },
+  cv: "https://firebasestorage.googleapis.com/v0/b/portfolio-assets-ba601.appspot.com/o/new-portfolio%2FCV%2FCV-Aditya_Balsane_7219316256.pdf?alt=media&token=7cce70dd-9f67-45d6-a9d8-9641fa43e472",
+  keywords: [
+    "Aditya Balsane",
+    "software engineer",
+    "mobile developer",
+    "React Native",
+    "React",
+    "Next.js",
+    "TypeScript",
+    "embedded systems",
+    "Raspberry Pi",
+    "LLM",
+    "portfolio",
+    "LawSage",
+    "RavenUAV",
+    "RaspiCarV2",
+    "WebRTC",
+    "Kotlin",
+    "Android",
+  ],
 } as const;
 
 export const navLinks = [
@@ -105,35 +136,39 @@ export const experiences = [
 
 export const projects = [
   {
-    title: "Lumina Dashboard",
-    category: "WEB APP",
+    title: "RavenUAV",
+    category: "UAV, AI agents & App Development",
     description:
-      "A real-time analytics dashboard with interactive visualizations and collaborative features for data teams.",
-    image: "/projects/lumina.jpg",
-    link: "#",
+      "RavenUAV is a Pixhawk-based drone system with a Raspberry Pi acting as a companion computer, working together to enable autonomous flight controlled by AI agents.",
+    image: ravenUAV,
+    imageHover: ravenUAVHover,
+    link: "",
   },
   {
-    title: "Ether Commerce",
-    category: "E-COMMERCE",
+    title: "LawSage",
+    category: "LLM & App Development",
     description:
-      "End-to-end e-commerce platform with headless CMS, payment processing, and inventory management.",
-    image: "/projects/ether.jpg",
-    link: "#",
+      "Lawsage is a legal advisory platform powered by LLM, featuring various models fine-tuned on Indian laws, regulations, relevant articles, legal advice forum threads, and other legal texts. It includes a Retrieval-Augmented Generation (RAG) based chat interface that uses a dataset comprising the Indian Constitution, Central Acts, and State Acts legislation. This dataset, compiled into a text corpus and stored as vector embeddings, serves as the underlying context for generating responses.",
+    image: lawSage,
+    imageHover: lawSageHover,
+    link: "https://github.com/adityaxp/LawSageApp",
   },
   {
-    title: "Meridian Design System",
-    category: "DESIGN SYSTEM",
+    title: "Node p2p Chat",
+    category: "App Development",
     description:
-      "A comprehensive component library with 60+ components, theming support, and accessibility baked in.",
-    image: "/projects/meridian.jpg",
-    link: "#",
+      "Real-time peer-to-peer chat application featuring end-to-end encryption, WebRTC, and BLE. Built with Expo + React Native.",
+    image: p2pChat,
+    imageHover: p2pChatHover,
+    link: "https://github.com/adityaxp/secure-chat",
   },
   {
-    title: "Pulse Mobile",
-    category: "MOBILE APP",
+    title: "RaspiCarV2",
+    category: "Embedded Systems & App Development",
     description:
-      "Cross-platform fitness tracking app with social features, workout planning, and health insights.",
-    image: "/projects/pulse.jpg",
-    link: "#",
+      "The RaspiCarV2, powered by Raspberry Pi 3B+ and integrated with Firebase for cloud-based remote control, is a surveillance car prototype.",
+    image: raspiCarV2,
+    imageHover: raspiCarV2Hover,
+    link: "https://github.com/adityaxp/RaspiCarV2",
   },
 ] as const;
