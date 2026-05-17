@@ -22,7 +22,7 @@ export default function GetInTouch() {
           variants={fadeUp}
           className="mt-6 max-w-3xl text-[clamp(2rem,6vw,3.5rem)] font-medium leading-[1.1] tracking-[-0.02em] text-ink-black"
         >
-          Let&apos;s build something enduring together.
+          Let&apos;s build something together.
         </motion.h2>
 
         <motion.p
@@ -37,20 +37,16 @@ export default function GetInTouch() {
           variants={fadeUp}
           className="mt-10 flex flex-wrap items-center justify-center gap-4"
         >
-          <Button
-            variant="primary"
-            size="large"
-            href={`mailto:${siteConfig.email}`}
-          >
+          <Button variant="primary" href={`mailto:${siteConfig.email}`}>
             Start a Conversation
-          </Button>
-          <Button variant="secondary" href={siteConfig.socials.linkedin}>
-            LinkedIn
           </Button>
         </motion.div>
 
         {/* Decorative orbital circles */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <div
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+          aria-hidden="true"
+        >
           <motion.div
             initial={{ opacity: 0, scale: 0 }}
             whileInView={{ opacity: 0.08, scale: 1 }}
