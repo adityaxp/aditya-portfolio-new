@@ -17,20 +17,22 @@ const footerColumns = [
   {
     title: "SOCIAL",
     links: [
-      { label: "GitHub", href: siteConfig.socials.github, external: true },
       {
         label: "LinkedIn",
         href: siteConfig.socials.linkedin,
         external: true,
       },
-      { label: "Twitter", href: siteConfig.socials.twitter, external: true },
+      { label: "GitHub", href: siteConfig.socials.github, external: true },
+      {
+        label: "Hugging Face",
+        href: siteConfig.socials.huggingface,
+        external: true,
+      },
     ],
   },
   {
     title: "CONTACT",
-    links: [
-      { label: siteConfig.email, href: `mailto:${siteConfig.email}` },
-    ],
+    links: [{ label: siteConfig.email, href: `mailto:${siteConfig.email}` }],
   },
 ];
 
