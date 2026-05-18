@@ -21,7 +21,7 @@ export const siteConfig = {
     linkedin: "https://www.linkedin.com/in/adityabalsane/",
     twitter: "https://twitter.com",
   },
-  cv: "https://firebasestorage.googleapis.com/v0/b/portfolio-assets-ba601.appspot.com/o/new-portfolio%2FCV%2FCV-Aditya_Balsane_7219316256.pdf?alt=media&token=7cce70dd-9f67-45d6-a9d8-9641fa43e472",
+  cv: "https://firebasestorage.googleapis.com/v0/b/portfolio-assets-ba601.appspot.com/o/CV%2FCV-Aditya_Balsane_%2B917219316256.pdf?alt=media&token=dab22968-ad47-457d-93be-776b4264fac4",
   keywords: [
     "Aditya Balsane",
     "software engineer",
