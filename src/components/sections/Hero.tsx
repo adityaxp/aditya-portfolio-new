@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
@@ -12,8 +12,41 @@ import {
 import EyebrowLabel from "@/components/ui/EyebrowLabel";
 import { siteConfig } from "@/lib/constants";
 
+function getClientAnalyticsPayload() {
+  const userAgent = navigator.userAgent;
+
+  let browser = "Unknown";
+  if (userAgent.includes("Chrome")) browser = "Chrome";
+  else if (userAgent.includes("Firefox")) browser = "Firefox";
+  else if (userAgent.includes("Safari")) browser = "Safari";
+
+  let os = "Unknown";
+  if (userAgent.includes("Windows")) os = "Windows";
+  else if (userAgent.includes("Mac")) os = "MacOS";
+  else if (userAgent.includes("Android")) os = "Android";
+  else if (userAgent.includes("iPhone")) os = "iOS";
+
+  const params = new URLSearchParams(window.location.search);
+
+  return {
+    browser,
+    os,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    language: navigator.language,
+    utmSource: params.get("utm_source") || "direct",
+  };
+}
+
 export default function Hero() {
   const [isDownloading, setIsDownloading] = useState(false);
+
+  const handlePageVisit = async () => {
+    await fetch("/api/page-visits", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(getClientAnalyticsPayload()),
+    });
+  };
 
   const handleDownload = async () => {
     if (isDownloading) return;
@@ -21,34 +54,10 @@ export default function Hero() {
     setIsDownloading(true);
 
     try {
-      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const language = navigator.language;
-      const userAgent = navigator.userAgent;
-
-      let browser = "Unknown";
-      if (userAgent.includes("Chrome")) browser = "Chrome";
-      else if (userAgent.includes("Firefox")) browser = "Firefox";
-      else if (userAgent.includes("Safari")) browser = "Safari";
-
-      let os = "Unknown";
-      if (userAgent.includes("Windows")) os = "Windows";
-      else if (userAgent.includes("Mac")) os = "MacOS";
-      else if (userAgent.includes("Android")) os = "Android";
-      else if (userAgent.includes("iPhone")) os = "iOS";
-
-      const params = new URLSearchParams(window.location.search);
-      const utmSource = params.get("utm_source") || "direct";
-
       const response = await fetch("/api/cv-download", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          browser,
-          os,
-          timezone,
-          language,
-          utmSource,
-        }),
+        body: JSON.stringify(getClientAnalyticsPayload()),
       });
 
       const data = (await response.json()) as { url?: string };
@@ -61,6 +70,10 @@ export default function Hero() {
       setIsDownloading(false);
     }
   };
+
+  useEffect(() => {
+    handlePageVisit();
+  }, []);
 
   return (
     <section className="relative flex min-h-svh items-center overflow-hidden bg-canvas-cream py-28 md:py-32">
