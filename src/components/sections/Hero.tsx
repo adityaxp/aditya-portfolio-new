@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import {
@@ -12,6 +13,55 @@ import EyebrowLabel from "@/components/ui/EyebrowLabel";
 import { siteConfig } from "@/lib/constants";
 
 export default function Hero() {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (isDownloading) return;
+
+    setIsDownloading(true);
+
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const language = navigator.language;
+      const userAgent = navigator.userAgent;
+
+      let browser = "Unknown";
+      if (userAgent.includes("Chrome")) browser = "Chrome";
+      else if (userAgent.includes("Firefox")) browser = "Firefox";
+      else if (userAgent.includes("Safari")) browser = "Safari";
+
+      let os = "Unknown";
+      if (userAgent.includes("Windows")) os = "Windows";
+      else if (userAgent.includes("Mac")) os = "MacOS";
+      else if (userAgent.includes("Android")) os = "Android";
+      else if (userAgent.includes("iPhone")) os = "iOS";
+
+      const params = new URLSearchParams(window.location.search);
+      const utmSource = params.get("utm_source") || "direct";
+
+      const response = await fetch("/api/cv-download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          browser,
+          os,
+          timezone,
+          language,
+          utmSource,
+        }),
+      });
+
+      const data = (await response.json()) as { url?: string };
+      const url = response.ok && data.url ? data.url : siteConfig.cv;
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (error) {
+      console.error(error);
+      window.open(siteConfig.cv, "_blank", "noopener,noreferrer");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <section className="relative min-h-screen overflow-hidden bg-canvas-cream pt-32 pb-24 md:pt-44 md:pb-32">
       <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-16">
@@ -77,32 +127,41 @@ export default function Hero() {
               variants={fadeUp}
               className="mt-8 flex flex-wrap items-center justify-center gap-2.5 md:justify-start md:gap-4"
             >
-              <motion.a
-                href={siteConfig.cv}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="inline-flex min-h-11 items-center gap-2.5 rounded-[999px] bg-ink-black px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em] text-canvas-cream md:min-h-12 md:px-7 md:text-sm"
+              <motion.button
+                type="button"
+                onClick={handleDownload}
+                disabled={isDownloading}
+                aria-busy={isDownloading}
+                aria-live="polite"
+                whileHover={isDownloading ? undefined : { scale: 1.02 }}
+                whileTap={isDownloading ? undefined : { scale: 0.98 }}
+                className="inline-flex min-h-11 min-w-[10.5rem] cursor-pointer items-center justify-center gap-2.5 rounded-[999px] bg-ink-black px-5 py-2.5 text-[13px] font-bold uppercase tracking-[0.12em] text-canvas-cream transition-opacity disabled:cursor-wait disabled:opacity-75 md:min-h-12 md:min-w-[11.5rem] md:px-7 md:text-sm"
               >
-                DOWNLOAD CV
-                <svg
-                  width="19"
-                  height="19"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M12 3V14M12 14L7.5 9.5M12 14L16.5 9.5M4 17.5V20H20V17.5"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                {isDownloading ? "Downloading…" : "DOWNLOAD CV"}
+                {isDownloading ? (
+                  <span
+                    className="h-[18px] w-[18px] shrink-0 animate-spin rounded-full border-2 border-canvas-cream/30 border-t-canvas-cream"
+                    aria-hidden
                   />
-                </svg>
-              </motion.a>
+                ) : (
+                  <svg
+                    width="19"
+                    height="19"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 3V14M12 14L7.5 9.5M12 14L16.5 9.5M4 17.5V20H20V17.5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </motion.button>
 
               <div className="flex items-center gap-2 md:gap-2.5">
                 <motion.a
