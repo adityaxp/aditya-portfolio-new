@@ -63,18 +63,18 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative min-h-screen overflow-hidden bg-canvas-cream pt-32 pb-24 md:pt-44 md:pb-32">
-      <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-16">
+    <section className="relative flex min-h-svh items-center overflow-hidden bg-canvas-cream py-28 md:py-32">
+      <div className="mx-auto w-full max-w-7xl px-6 md:px-12 lg:px-16">
         <motion.div
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
-          className="relative z-10 grid gap-16 md:grid-cols-12 md:gap-12"
+          className="relative z-10 grid w-full items-center gap-12 md:grid-cols-12 md:gap-12 lg:gap-14"
         >
           {/* Left — circular portrait */}
           <motion.div
             variants={scaleIn}
-            className="flex items-start justify-center md:col-span-5"
+            className="flex items-center justify-center md:col-span-5"
           >
             <div className="relative">
               <div className="relative h-72 w-72 overflow-hidden rounded-full ring-1 ring-ink-black/10 md:h-80 md:w-80">
