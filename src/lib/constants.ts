@@ -139,7 +139,7 @@ export const projects = [
     title: "RavenUAV",
     category: "UAV, AI agents & App Development",
     description:
-      "RavenUAV is a Pixhawk-based drone system with a Raspberry Pi acting as a companion computer, working together to enable autonomous flight controlled by AI agents.",
+      "RavenUAV is an autonomous drone platform powered by AI agents, leveraging a Pixhawk flight controller and a Raspberry Pi companion computer for intelligent autonomous flight.",
     image: ravenUAV,
     imageHover: ravenUAVHover,
     link: "",
