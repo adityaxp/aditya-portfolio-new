@@ -1,10 +1,14 @@
 "use client";
 
 import Image from "next/image";
+import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 import SectionWrapper from "@/components/ui/SectionWrapper";
 import GhostText from "@/components/ui/GhostText";
+import ProjectModal, {
+  type ProjectModalData,
+} from "@/components/ui/ProjectModal";
 import { projects } from "@/lib/constants";
 import EyebrowLabel from "@/components/ui/EyebrowLabel";
 
@@ -13,20 +17,33 @@ function projectHasLink(link: string) {
   return trimmed.length > 0 && trimmed !== "#";
 }
 
-function linkIsExternal(href: string) {
-  return href.startsWith("http");
-}
-
 const projectCardMediaStillClass = "h-full w-full object-cover object-center";
 const projectCardMediaHoverClass = "h-full w-full object-contain object-center";
 
 const projectCardInteractiveClass =
-  "group/card focus-visible:ring-light-orange flex h-full flex-col overflow-hidden rounded-xl border border-ink-black/[0.08] bg-lifted-cream text-left shadow-[0_1px_0_rgba(20,20,19,0.05)] outline-none transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-ink-black/15 hover:shadow-[0_16px_40px_-20px_rgba(20,20,19,0.14)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas-cream";
+  "group/card focus-visible:ring-light-orange flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-ink-black/[0.08] bg-lifted-cream text-left shadow-[0_1px_0_rgba(20,20,19,0.05)] outline-none transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-ink-black/15 hover:shadow-[0_16px_40px_-20px_rgba(20,20,19,0.14)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas-cream";
 
 const projectCardDisabledClass =
-  "group/card flex h-full cursor-default flex-col overflow-hidden rounded-xl border border-ink-black/[0.06] bg-lifted-cream/90 text-left shadow-none";
+  "group/card flex h-full cursor-pointer flex-col overflow-hidden rounded-xl border border-ink-black/[0.06] bg-lifted-cream/90 text-left shadow-none transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-ink-black/12 hover:shadow-[0_12px_32px_-20px_rgba(20,20,19,0.12)]";
 
 export default function Projects() {
+  const [selectedProject, setSelectedProject] =
+    useState<ProjectModalData | null>(null);
+
+  const openProject = useCallback((project: (typeof projects)[number]) => {
+    setSelectedProject({
+      title: project.title,
+      category: project.category,
+      image: project.image,
+      imageHover: "imageHover" in project ? project.imageHover : undefined,
+      link: project.link,
+    });
+  }, []);
+
+  const closeProject = useCallback(() => {
+    setSelectedProject(null);
+  }, []);
+
   return (
     <SectionWrapper id="projects" background="cream">
       <GhostText
@@ -55,7 +72,6 @@ export default function Projects() {
             const hasHover =
               "imageHover" in project && Boolean(project.imageHover);
             const isLinked = projectHasLink(project.link);
-            const external = isLinked && linkIsExternal(project.link);
             const cardClass = isLinked
               ? projectCardInteractiveClass
               : projectCardDisabledClass;
@@ -110,25 +126,23 @@ export default function Projects() {
                   <span
                     className={`mt-4 inline-flex items-center gap-2 text-sm font-semibold text-light-orange`}
                   >
-                    {isLinked ? "View details" : "Coming soon"}
-                    {isLinked ? (
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        className="transition-transform duration-300 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5"
-                        aria-hidden
-                      >
-                        <path
-                          d="M5 15L15 5M15 5H8M15 5V12"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    ) : null}
+                    {isLinked ? "View preview" : "Coming soon"}
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      className="transition-transform duration-300 group-hover/card:translate-x-0.5 group-hover/card:-translate-y-0.5"
+                      aria-hidden
+                    >
+                      <path
+                        d="M5 15L15 5M15 5H8M15 5V12"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </span>
                 </div>
               </>
@@ -140,26 +154,21 @@ export default function Projects() {
                 variants={staggerItem}
                 className="min-w-0"
               >
-                {isLinked ? (
-                  <a
-                    href={project.link}
-                    {...(external
-                      ? { target: "_blank", rel: "noopener noreferrer" }
-                      : {})}
-                    className={cardClass}
-                  >
-                    {cardBody}
-                  </a>
-                ) : (
-                  <article className={cardClass} aria-disabled="true">
-                    {cardBody}
-                  </article>
-                )}
+                <button
+                  type="button"
+                  onClick={() => openProject(project)}
+                  className={cardClass}
+                  aria-label={`Open preview for ${project.title}`}
+                >
+                  {cardBody}
+                </button>
               </motion.li>
             );
           })}
         </motion.ul>
       </div>
+
+      <ProjectModal project={selectedProject} onClose={closeProject} />
     </SectionWrapper>
   );
 }
