@@ -7,6 +7,9 @@ import {
   raspiCarV2Hover,
   ravenUAV,
   ravenUAVHover,
+  hvacAI,
+  hvacAIHover,
+  financialAgent,
 } from "../../assets";
 
 export const siteConfig = {
@@ -136,13 +139,13 @@ export const experiences = [
 
 export const projects = [
   {
-    title: "RavenUAV",
-    category: "UAV, AI agents & App Development",
+    title: "HVAC AI",
+    category: "LLM, AGENTS & App Development",
     description:
-      "RavenUAV is an autonomous drone platform powered by AI agents, leveraging a Pixhawk flight controller and a Raspberry Pi companion computer for intelligent autonomous flight.",
-    image: ravenUAV,
-    imageHover: ravenUAVHover,
-    link: "",
+      "This project monitors HVAC units using sensor telemetry data and provides anomaly detection, health scoring, maintenance recommendations, alert management, and an AI-powered maintenance assistant.",
+    image: hvacAI,
+    imageHover: hvacAIHover,
+    link: "https://github.com/adityaxp/HVAC-ai.git",
   },
   {
     title: "LawSage",
@@ -152,6 +155,23 @@ export const projects = [
     image: lawSage,
     imageHover: lawSageHover,
     link: "https://github.com/adityaxp/LawSageApp",
+  },
+  {
+    title: "Financial Agent",
+    category: "LLM, RAG, MCP & Agents",
+    description:
+      "A multi-agent system for financial analysis and document retrieval, powered by LLMs and equipped with financial tools via Model Context Protocol (MCP).",
+    image: financialAgent,
+    link: "https://github.com/adityaxp/financial-agent",
+  },
+  {
+    title: "RavenUAV",
+    category: "UAV, AI agents & App Development",
+    description:
+      "RavenUAV is an autonomous drone platform powered by AI agents, leveraging a Pixhawk flight controller and a Raspberry Pi companion computer for intelligent autonomous flight.",
+    image: ravenUAV,
+    imageHover: ravenUAVHover,
+    link: "",
   },
   {
     title: "Node p2p Chat",
