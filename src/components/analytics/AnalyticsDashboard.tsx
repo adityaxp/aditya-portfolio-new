@@ -12,6 +12,7 @@ import {
   formatAnalyticsDate,
   type AnalyticsRecord,
 } from "@/lib/analyticsTypes";
+import AnalyticsCharts from "@/components/analytics/AnalyticsCharts";
 
 type DataSource = "page-visits" | "cv-downloads";
 
@@ -190,6 +191,15 @@ export default function AnalyticsDashboard({
           </span>
         </div>
       </div>
+
+      <AnalyticsCharts
+        pageVisits={pageVisits}
+        cvDownloads={cvDownloads}
+        activeRecords={filteredRecords}
+        period={period}
+        sourceLabel={source === "page-visits" ? "Page visits" : "CV downloads"}
+        loading={isLoading}
+      />
 
       <div className="flex min-h-0 flex-1 flex-col overflow-auto bg-canvas-cream/50 p-4 md:p-6 lg:px-10">
         {error ? (
