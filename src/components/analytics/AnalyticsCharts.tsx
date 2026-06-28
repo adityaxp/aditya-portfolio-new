@@ -24,6 +24,7 @@ import {
   analyticsChartPalette,
   buildTrafficSeries,
   countByField,
+  countByUtmSource,
   hasChartData,
 } from "@/lib/analyticsCharts";
 import { periodLabel, type TimePeriod } from "@/lib/analyticsStats";
@@ -207,8 +208,8 @@ export default function AnalyticsCharts({
     () => countByField(activeRecords, "country", 6),
     [activeRecords],
   );
-  const browsers = useMemo(
-    () => countByField(activeRecords, "browser", 5),
+  const utmSources = useMemo(
+    () => countByUtmSource(activeRecords, 5),
     [activeRecords],
   );
   const devices = useMemo(
@@ -216,9 +217,9 @@ export default function AnalyticsCharts({
     [activeRecords],
   );
 
-  const browserTotal = useMemo(
-    () => browsers.reduce((sum, item) => sum + item.value, 0),
-    [browsers],
+  const utmTotal = useMemo(
+    () => utmSources.reduce((sum, item) => sum + item.value, 0),
+    [utmSources],
   );
   const deviceTotal = useMemo(
     () => devices.reduce((sum, item) => sum + item.value, 0),
@@ -339,16 +340,16 @@ export default function AnalyticsCharts({
       </ChartShell>
 
       <ChartShell
-        title="Browsers"
+        title="UTM sources"
         subtitle={`Share of ${sourceLabel.toLowerCase()} · ${periodText}`}
-        emptyMessage={`No browser data for ${periodText}.`}
-        isEmpty={!hasChartData(browsers)}
+        emptyMessage={`No UTM data for ${periodText}.`}
+        isEmpty={!hasChartData(utmSources)}
         loading={loading}
       >
         <ResponsiveContainer width="100%" height={240}>
           <PieChart>
             <Pie
-              data={browsers}
+              data={utmSources}
               dataKey="value"
               nameKey="name"
               cx="50%"
@@ -361,7 +362,7 @@ export default function AnalyticsCharts({
             >
               <Label
                 content={(props) => (
-                  <DonutCenterLabel {...props} total={browserTotal} />
+                  <DonutCenterLabel {...props} total={utmTotal} />
                 )}
                 position="center"
               />
@@ -370,7 +371,7 @@ export default function AnalyticsCharts({
           </PieChart>
         </ResponsiveContainer>
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-          {browsers.map((entry, index) => (
+          {utmSources.map((entry, index) => (
             <LegendItem
               key={entry.name}
               color={analyticsChartPalette[index % analyticsChartPalette.length]}
