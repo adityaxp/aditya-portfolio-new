@@ -77,6 +77,27 @@ export function countByField(
     .map(([name, value]) => ({ name, value }));
 }
 
+export function countByUtmSource(
+  records: AnalyticsRecord[],
+  limit = 6,
+): CategoryPoint[] {
+  const counts = new Map<string, number>();
+
+  for (const record of records) {
+    const raw = String(record.utmSource ?? "").trim();
+    const name =
+      raw && raw !== "—" && raw !== "unknown" && raw !== "Unknown"
+        ? raw
+        : "direct";
+    counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+
+  return [...counts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, limit)
+    .map(([name, value]) => ({ name, value }));
+}
+
 function incrementTraffic(
   map: Map<number, TrafficPoint>,
   key: number,
