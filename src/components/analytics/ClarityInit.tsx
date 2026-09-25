@@ -3,13 +3,17 @@
 import { useEffect } from "react";
 import Clarity from "@microsoft/clarity";
 
-export default function ClarityInit() {
-  useEffect(() => {
-    const projectId = process.env.CLARITY_PROJECT_ID?.trim();
-    if (!projectId) return;
+type ClarityInitProps = {
+  projectId?: string;
+};
 
-    Clarity.init(projectId);
-  }, []);
+export default function ClarityInit({ projectId }: ClarityInitProps) {
+  useEffect(() => {
+    const normalizedProjectId = projectId?.trim();
+    if (!normalizedProjectId) return;
+
+    Clarity.init(normalizedProjectId);
+  }, [projectId]);
 
   return null;
 }
