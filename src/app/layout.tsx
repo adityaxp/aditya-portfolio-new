@@ -30,6 +30,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const clarityProjectId =
+    process.env.CLARITY_PROJECT_ID ?? process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID;
+
   return (
     <html
       lang="en"
@@ -41,7 +44,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
-        <ClarityInit />
+        <ClarityInit projectId={clarityProjectId} />
         <Analytics />
         <SpeedInsights />
       </body>
