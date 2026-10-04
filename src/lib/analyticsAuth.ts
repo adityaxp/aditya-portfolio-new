@@ -2,7 +2,6 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
 export const ANALYTICS_AUTH_COOKIE = "portfolio_analytics_session";
-export const ANALYTICS_FAILURES_COOKIE = "portfolio_analytics_failures";
 export const MAX_ANALYTICS_ATTEMPTS = 4;
 export const ANALYTICS_CODE_LENGTH = 6;
 const SESSION_DURATION_SEC = 60 * 60 * 12;
@@ -57,15 +56,4 @@ export async function isAnalyticsAuthenticated(): Promise<boolean> {
   const cookieStore = await cookies();
   const token = cookieStore.get(ANALYTICS_AUTH_COOKIE)?.value;
   return token ? verifySessionToken(token) : false;
-}
-
-export async function getFailureCount(): Promise<number> {
-  const cookieStore = await cookies();
-  const raw = cookieStore.get(ANALYTICS_FAILURES_COOKIE)?.value;
-  const count = raw ? Number.parseInt(raw, 10) : 0;
-  return Number.isFinite(count) ? count : 0;
-}
-
-export function isLockedOut(failureCount: number): boolean {
-  return failureCount >= MAX_ANALYTICS_ATTEMPTS;
 }
