@@ -7,6 +7,7 @@ import Button from "@/components/ui/Button";
 const CODE_LENGTH = 6;
 
 type AccessGateProps = {
+  destination?: string;
   locked: boolean;
   attemptsRemaining: number;
   onVerified: () => void;
@@ -15,6 +16,7 @@ type AccessGateProps = {
 };
 
 export default function AccessGate({
+  destination = "analytics panel",
   locked,
   attemptsRemaining,
   onVerified,
@@ -140,7 +142,7 @@ export default function AccessGate({
         Restricted access
       </h1>
       <p className="mt-3 text-center text-sm leading-relaxed text-granite md:text-base">
-        Enter your 6-digit code to open the analytics panel.
+        Enter your 6-digit code to open the {destination}.
       </p>
 
       <motion.div

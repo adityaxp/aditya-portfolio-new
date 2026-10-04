@@ -1,0 +1,11 @@
+[
+  {
+    "origin": [
+      "https://www.adityabalsane.com",
+      "http://localhost:3000"
+    ],
+    "method": ["PUT"],
+    "responseHeader": ["Content-Type"],
+    "maxAgeSeconds": 3600
+  }
+]
