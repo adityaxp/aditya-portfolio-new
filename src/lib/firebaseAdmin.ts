@@ -13,5 +13,8 @@ if (!admin.apps.length) {
 }
 
 const db = admin.firestore();
+const storageBucket = admin.storage().bucket(
+  process.env.FIREBASE_STORAGE_BUCKET || "portfolio-assets-ba601.appspot.com",
+);
 
-export { db };
+export { db, storageBucket };
