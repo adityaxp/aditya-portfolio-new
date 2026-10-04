@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   computeSummary,
   filterRecordsByPeriod,
@@ -44,46 +45,41 @@ export default function AnalyticsDashboard({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAll = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const [visitsRes, downloadsRes] = await Promise.all([
-        fetch("/api/analytics/page-visits", { credentials: "include" }),
-        fetch("/api/analytics/cv-downloads", { credentials: "include" }),
-      ]);
-
-      if (visitsRes.status === 401 || downloadsRes.status === 401) {
-        window.location.reload();
-        return;
-      }
-
-      if (!visitsRes.ok || !downloadsRes.ok) {
-        throw new Error("Failed to load data");
-      }
-
-      const visitsData = (await visitsRes.json()) as {
-        records: AnalyticsRecord[];
-      };
-      const downloadsData = (await downloadsRes.json()) as {
-        records: AnalyticsRecord[];
-      };
-
-      setPageVisits(visitsData.records ?? []);
-      setCvDownloads(downloadsData.records ?? []);
-    } catch {
-      setError("Could not load analytics. Please refresh.");
-      setPageVisits([]);
-      setCvDownloads([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchAll();
-  }, [fetchAll]);
+    let active = true;
+    Promise.all([
+      fetch("/api/analytics/page-visits", { credentials: "include" }),
+      fetch("/api/analytics/cv-downloads", { credentials: "include" }),
+    ])
+      .then(async ([visitsRes, downloadsRes]) => {
+        if (visitsRes.status === 401 || downloadsRes.status === 401) {
+          window.location.reload();
+          return null;
+        }
+        if (!visitsRes.ok || !downloadsRes.ok) throw new Error("Failed to load data");
+        return Promise.all([
+          visitsRes.json() as Promise<{ records: AnalyticsRecord[] }>,
+          downloadsRes.json() as Promise<{ records: AnalyticsRecord[] }>,
+        ]);
+      })
+      .then((data) => {
+        if (!active || !data) return;
+        setPageVisits(data[0].records ?? []);
+        setCvDownloads(data[1].records ?? []);
+      })
+      .catch(() => {
+        if (!active) return;
+        setError("Could not load analytics. Please refresh.");
+        setPageVisits([]);
+        setCvDownloads([]);
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const summary = useMemo(
     () => computeSummary(pageVisits, cvDownloads),
@@ -111,10 +107,13 @@ export default function AnalyticsDashboard({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <header className="shrink-0 border-b border-ink-black/10 px-6 py-5 md:px-10 md:py-6">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-ink-black/10 px-6 py-5 md:px-10 md:py-6">
         <h1 className="text-2xl font-medium tracking-[-0.02em] text-ink-black md:text-3xl">
           Portfolio Analytics
         </h1>
+        <Link href="/hosted" className="text-sm font-medium text-link-blue hover:underline">
+          Hosted files
+        </Link>
       </header>
 
       {/* Stats */}
