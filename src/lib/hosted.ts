@@ -19,6 +19,8 @@ export type HostedItem = {
   totalBytes: number;
   downloadCount: number;
   createdAt: string;
+  previewPath?: string;
+  previewContentType?: string;
 };
 
 export type HostedDownload = {
