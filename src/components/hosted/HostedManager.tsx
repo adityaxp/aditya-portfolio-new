@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import AdminIcon from "@/components/admin/AdminIcon";
+import HostedItemPreview from "@/components/hosted/HostedItemPreview";
 import {
   formatBytes,
   isHostedPath,
@@ -18,7 +20,7 @@ type UploadMode = "file" | "folder";
 async function api<T>(url: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, { credentials: "include", ...options });
   if (response.status === 401) {
-    window.location.reload();
+    window.dispatchEvent(new Event("admin-session-required"));
     throw new Error("Session expired");
   }
   const data = await response.json().catch(() => ({}));
@@ -64,6 +66,7 @@ export default function HostedManager() {
   const [items, setItems] = useState<HostedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<UploadMode>("file");
+  const [showUpload, setShowUpload] = useState(false);
   const [title, setTitle] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [skippedCount, setSkippedCount] = useState(0);
@@ -78,6 +81,22 @@ export default function HostedManager() {
   const [activityLoading, setActivityLoading] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const folderInput = useRef<HTMLInputElement>(null);
+  const uploadDialog = useRef<HTMLDialogElement>(null);
+  const activityDialog = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    const dialog = uploadDialog.current;
+    if (!dialog) return;
+    if (showUpload && !dialog.open) dialog.showModal();
+    if (!showUpload && dialog.open) dialog.close();
+  }, [showUpload]);
+
+  useEffect(() => {
+    const dialog = activityDialog.current;
+    if (!dialog) return;
+    if (activityId && !dialog.open) dialog.showModal();
+    if (!activityId && dialog.open) dialog.close();
+  }, [activityId]);
 
   const refresh = useCallback(async () => {
     try {
@@ -229,6 +248,7 @@ export default function HostedManager() {
       resetForm();
       await refresh();
       setStatus("Published. Your link is ready to share.");
+      setShowUpload(false);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Upload failed");
       setStatus("Upload paused. Retry, or delete the draft below.");
@@ -281,20 +301,19 @@ export default function HostedManager() {
   };
 
   return (
-    <main className="min-h-svh bg-canvas-cream">
-      <header className="border-b border-ink-black/10 bg-lifted-cream px-5 py-5 sm:px-8">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold text-ink-black">Hosted files</h1>
-          <Link href="/portfolio-analytics" className="text-sm text-link-blue hover:underline">
-            Portfolio analytics
-          </Link>
+    <main className="hosted-manager min-h-[calc(100svh-72px)] px-6 pb-12 pt-8 md:px-10 md:pt-9">
+      <div className="mx-auto max-w-6xl">
+        <div className="hosted-manager-header">
+          <h1 className="admin-page-heading">Files</h1>
+          <button type="button" className="hosted-toolbar-button" onClick={() => setShowUpload(true)} aria-haspopup="dialog" aria-controls="hosted-upload-panel">
+            <AdminIcon name="plus" size={17} /> Upload
+          </button>
         </div>
-      </header>
-
-      <div className="mx-auto max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
-        <section className="border-b border-ink-black/10 pb-10">
-          <h2 className="text-lg font-semibold">Upload</h2>
-          <div className="mt-5 inline-flex overflow-hidden rounded-md border border-ink-black/20" role="group" aria-label="Upload type">
+        {!showUpload && status ? <p className="hosted-status" role="status">{status}</p> : null}
+        <dialog id="hosted-upload-panel" ref={uploadDialog} className="hosted-dialog" onClose={() => setShowUpload(false)} onCancel={(event) => { if (busy) event.preventDefault(); }} aria-labelledby="hosted-upload-title">
+          <div className="hosted-dialog-header"><div><h2 id="hosted-upload-title">Upload files</h2><p>Choose a file or folder to share.</p></div><button type="button" className="hosted-icon-button" disabled={busy} onClick={() => setShowUpload(false)} aria-label="Close upload"><AdminIcon name="x" size={18} /></button></div>
+          <div className="hosted-dialog-body">
+          <div className="admin-mode-switch mt-5 inline-flex border" role="group" aria-label="Upload type">
             {(["file", "folder"] as const).map((option) => (
               <button
                 key={option}
@@ -307,7 +326,7 @@ export default function HostedManager() {
                   setSkippedCount(0);
                   setTitle("");
                 }}
-                className={`min-w-24 px-4 py-2 text-sm font-medium capitalize disabled:opacity-50 ${mode === option ? "bg-ink-black text-white" : "bg-white text-ink-black"}`}
+                className="min-w-24 px-4 py-2 text-sm font-medium capitalize disabled:opacity-50"
               >
                 {option}
               </button>
@@ -315,8 +334,9 @@ export default function HostedManager() {
           </div>
 
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
-            <label className="block text-sm font-medium text-granite">
-              {mode === "folder" ? "Choose folder" : "Choose file"}
+            <label className="hosted-picker-field block text-sm font-medium text-granite">
+              {mode === "folder" ? "Folder" : "File"}
+              <span className="hosted-picker-control"><AdminIcon name={mode === "folder" ? "folder" : "file"} size={17} /><span>{files.length ? mode === "folder" ? files[0]?.webkitRelativePath.split("/")[0] : files[0]?.name : `Choose ${mode}`}</span></span>
               {mode === "folder" ? (
                 <input
                   ref={(node) => {
@@ -327,7 +347,7 @@ export default function HostedManager() {
                   multiple
                   disabled={busy || Boolean(draftId)}
                   onChange={(event) => selectFiles(event.target.files)}
-                  className="mt-2 block w-full text-sm text-ink-black file:mr-4 file:rounded-md file:border file:border-ink-black/20 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium disabled:opacity-50"
+                  className="hosted-picker-input"
                 />
               ) : (
                 <input
@@ -335,18 +355,18 @@ export default function HostedManager() {
                   type="file"
                   disabled={busy || Boolean(draftId)}
                   onChange={(event) => selectFiles(event.target.files)}
-                  className="mt-2 block w-full text-sm text-ink-black file:mr-4 file:rounded-md file:border file:border-ink-black/20 file:bg-white file:px-4 file:py-2 file:text-sm file:font-medium disabled:opacity-50"
+                  className="hosted-picker-input"
                 />
               )}
             </label>
             <label className="block text-sm font-medium text-granite">
-              Link title
+              Display name
               <input
                 value={title}
                 maxLength={120}
                 disabled={busy || Boolean(draftId)}
                 onChange={(event) => setTitle(event.target.value)}
-                className="mt-2 block w-full rounded-md border border-ink-black/20 bg-white px-3 py-2 text-ink-black outline-none focus:border-link-blue disabled:opacity-50"
+                className="admin-field mt-2 block w-full border px-3 py-2 text-ink-black outline-none disabled:opacity-50"
               />
             </label>
           </div>
@@ -368,92 +388,74 @@ export default function HostedManager() {
               <p className="mt-2 break-all text-sm text-granite">{progress}% · {status}</p>
             </div>
           ) : status ? <p className="mt-4 text-sm text-granite">{status}</p> : null}
-          {error ? <p role="alert" className="mt-4 text-sm text-signal-orange">{error}</p> : null}
+          {error ? <p role="alert" className="admin-danger mt-4 text-sm">{error}</p> : null}
 
           <button
             type="button"
             disabled={busy || files.length === 0}
             onClick={() => void upload()}
-            className="mt-5 rounded-md bg-ink-black px-5 py-2.5 text-sm font-medium text-white hover:bg-charcoal disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-5 rounded-lg bg-signal-orange px-5 py-2.5 text-sm font-medium text-white hover:bg-clay-brown disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? "Uploading..." : draftId ? "Retry upload" : "Upload and publish"}
           </button>
-        </section>
+          </div>
+        </dialog>
 
-        <section className="pt-9">
-          <div className="flex items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold">Your links</h2>
-            <button type="button" onClick={() => void refresh()} className="text-sm text-link-blue hover:underline">Refresh</button>
+        <section className="admin-panel hosted-files-panel">
+          <div className="hosted-files-heading">
+            <div><h2>Your files</h2><span>{loading ? <span className="admin-skeleton admin-skeleton-count" aria-label="Loading files" /> : `${items.length} item${items.length === 1 ? "" : "s"}`}</span></div>
+            <div className="hosted-heading-actions">{copiedId ? <span role="status">Link copied</span> : null}<button type="button" onClick={() => void refresh()} className="hosted-icon-button" aria-label="Refresh files" title="Refresh files"><AdminIcon name="refresh" size={17} /></button></div>
           </div>
           {loading ? (
-            <p className="py-8 text-sm text-granite">Loading...</p>
+            <div className="hosted-skeleton-list" role="status" aria-label="Loading files">
+              {Array.from({ length: 5 }, (_, index) => <div className="admin-skeleton-row" key={index}><span className="admin-skeleton admin-skeleton-icon" /><span className="admin-skeleton admin-skeleton-name" /><span className="admin-skeleton admin-skeleton-meta" /></div>)}
+            </div>
           ) : items.length === 0 ? (
-            <p className="py-8 text-sm text-granite">No hosted files yet.</p>
+            <div className="hosted-empty"><AdminIcon name="folder" size={24} /><p>No hosted files yet.</p><button type="button" onClick={() => setShowUpload(true)}>Upload a file</button></div>
           ) : (
-            <ul className="mt-4 divide-y divide-ink-black/10 border-y border-ink-black/10">
+            <><div className="hosted-file-columns"><span>Name</span><span>Created</span><span>Downloads</span><span>Actions</span></div><ul className="hosted-file-list">
               {items.map((item) => (
-                <li key={item.id} className="py-4">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="min-w-0">
-                      <p className="break-words text-sm font-medium text-ink-black">{item.title}</p>
-                      <p className="mt-1 text-xs text-slate-gray">
-                        {item.status === "ready" ? `${item.kind} · ${item.fileCount} file${item.fileCount === 1 ? "" : "s"} · ${formatBytes(item.totalBytes)} · ${item.downloadCount} download${item.downloadCount === 1 ? "" : "s"}` : "Unfinished upload"}
-                      </p>
+                <li key={item.id} className="hosted-file-item">
+                  <div className="hosted-file-row">
+                    <HostedItemPreview item={item} />
+                    <div className="hosted-file-name">
+                      {item.status === "ready" ? <Link href={`/hosted/${item.id}`} target="_blank">{item.title}</Link> : <strong>{item.title}</strong>}
+                      <span>{item.status === "ready" ? `${item.kind === "folder" ? `${item.fileCount} files` : "File"} · ${formatBytes(item.totalBytes)}` : "Unfinished upload"}</span>
                     </div>
-                    <div className="flex shrink-0 items-center gap-4 text-sm">
-                      {item.status === "ready" ? (
-                        <>
-                          <Link href={`/hosted/${item.id}`} target="_blank" className="text-link-blue hover:underline">Open</Link>
-                          <button type="button" onClick={() => void copyLink(item.id)} className="text-link-blue hover:underline">
-                            {copiedId === item.id ? "Copied" : "Copy link"}
-                          </button>
-                          <button type="button" aria-expanded={activityId === item.id} onClick={() => void showActivity(item.id)} className="text-link-blue hover:underline">
-                            Activity
-                          </button>
-                        </>
-                      ) : null}
-                      <button type="button" disabled={busy} onClick={() => void remove(item)} className="text-signal-orange hover:underline disabled:opacity-50">Delete</button>
+                    <span className="hosted-file-date">{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "—"}</span>
+                    <span className="hosted-file-downloads">{item.status === "ready" ? item.downloadCount.toLocaleString() : "—"}</span>
+                    <div className="hosted-file-actions">
+                      {item.status === "ready" ? <>
+                        <button type="button" onClick={() => void copyLink(item.id)} className="hosted-icon-button" aria-label={`Copy link to ${item.title}`} title={copiedId === item.id ? "Copied" : "Copy link"}><AdminIcon name="link" size={16} /></button>
+                        <button type="button" aria-expanded={activityId === item.id} onClick={() => void showActivity(item.id)} className="hosted-icon-button" aria-label={`Activity for ${item.title}`} title="Activity"><AdminIcon name="chart" size={16} /></button>
+                      </> : null}
+                      <button type="button" disabled={busy} onClick={() => void remove(item)} className="hosted-icon-button is-danger" aria-label={`Delete ${item.title}`} title="Delete"><AdminIcon name="trash" size={16} /></button>
                     </div>
                   </div>
-                  {activityId === item.id ? (
-                    <div className="mt-4 border-t border-ink-black/10 pt-3">
-                      <p className="mb-2 text-xs font-medium text-granite">Recent downloads</p>
-                      {activityLoading ? <p className="text-sm text-granite">Loading...</p> : activity.length === 0 ? (
-                        <p className="text-sm text-granite">No downloads yet.</p>
-                      ) : (
-                        <div className="w-full overflow-x-auto">
-                          <table className="w-full min-w-[900px] border-collapse text-left text-xs text-granite">
-                            <thead>
-                              <tr className="border-b border-ink-black/10 text-slate-gray">
-                                {(["Date", "File", "IP", "Country", "City", "Browser", "OS", "Device"] as const).map((label) => (
-                                  <th key={label} scope="col" className="px-2 py-2 font-medium first:pl-0 last:pr-0">{label}</th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {activity.map((download) => (
-                                <tr key={download.id} className="border-b border-ink-black/10 align-top last:border-0">
-                                  <td className="whitespace-nowrap px-2 py-2 pl-0">{download.createdAt ? new Date(download.createdAt).toLocaleString() : "—"}</td>
-                                  <td className="max-w-64 break-all px-2 py-2">{download.path ?? "Folder ZIP"}</td>
-                                  <td className="px-2 py-2">{download.ip ?? "—"}</td>
-                                  <td className="px-2 py-2">{download.country ?? "—"}</td>
-                                  <td className="px-2 py-2">{download.city ?? "—"}</td>
-                                  <td className="px-2 py-2">{download.browser ?? "—"}</td>
-                                  <td className="px-2 py-2">{download.os ?? "—"}</td>
-                                  <td className="px-2 py-2 pr-0">{download.deviceModel ? `${download.deviceType ?? "Device"} · ${download.deviceModel}` : download.deviceType ?? "—"}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-                  ) : null}
                 </li>
               ))}
-            </ul>
+            </ul></>
           )}
         </section>
+        <dialog ref={activityDialog} className="hosted-dialog hosted-activity-dialog" onClose={() => setActivityId(null)} aria-labelledby="hosted-activity-title">
+          <div className="hosted-dialog-header"><div><h2 id="hosted-activity-title">Download activity</h2><p>{items.find((item) => item.id === activityId)?.title ?? "Hosted file"}</p></div><button type="button" className="hosted-icon-button" onClick={() => setActivityId(null)} aria-label="Close activity"><AdminIcon name="x" size={18} /></button></div>
+          <div className="hosted-activity-body">
+            {activityLoading ? <p className="hosted-dialog-empty">Loading activity…</p> : error ? <p className="hosted-dialog-empty admin-danger" role="alert">{error}</p> : activity.length === 0 ? <p className="hosted-dialog-empty">No downloads yet.</p> : (
+              <ul className="hosted-activity-list">
+                {activity.map((download) => (
+                  <li key={download.id}>
+                    <div className="hosted-activity-primary"><span>{download.path ?? "Folder ZIP"}</span><time>{download.createdAt ? new Date(download.createdAt).toLocaleString() : "—"}</time></div>
+                    <div className="hosted-activity-details">
+                      <span>{download.ip ?? "Unknown IP"}</span>
+                      <span>{[download.city, download.country].filter(Boolean).join(", ") || "Unknown location"}</span>
+                      <span>{[download.browser, download.os, download.deviceModel ?? download.deviceType].filter(Boolean).join(" · ") || "Unknown device"}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </dialog>
       </div>
     </main>
   );
