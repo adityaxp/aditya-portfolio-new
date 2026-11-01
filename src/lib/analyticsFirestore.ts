@@ -13,6 +13,9 @@ type FirestoreAnalyticsDoc = {
   deviceType?: string;
   userAgent?: string;
   timestamp?: Timestamp | Date;
+  path?: string;
+  referrer?: string;
+  sessionId?: string | null;
 };
 
 function toIsoString(value: Timestamp | Date | undefined): string | null {
@@ -40,5 +43,8 @@ export function mapAnalyticsDoc(
     utmSource: data.utmSource ?? "—",
     deviceType: data.deviceType ?? "—",
     timestamp: toIsoString(data.timestamp),
+    path: data.path,
+    referrer: data.referrer,
+    sessionId: data.sessionId,
   };
 }
