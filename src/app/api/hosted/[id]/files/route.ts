@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAnalyticsAuthenticated } from "@/lib/analyticsAuth";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { storageBucket } from "@/lib/firebaseAdmin";
 import { MAX_HOSTED_FILE_BYTES, isHostedPath } from "@/lib/hosted";
 import { fileDocId, hostedDoc, isSameOrigin } from "@/lib/hostedServer";
@@ -10,7 +10,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAnalyticsAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!isSameOrigin(req)) {
