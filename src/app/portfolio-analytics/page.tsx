@@ -1,12 +1,5 @@
-"use client";
-
-import ProtectedPage from "@/components/analytics/ProtectedPage";
-import AnalyticsDashboard from "@/components/analytics/AnalyticsDashboard";
+import { redirect } from "next/navigation";
 
 export default function PortfolioAnalyticsPage() {
-  return (
-    <ProtectedPage destination="analytics panel">
-      <AnalyticsDashboard />
-    </ProtectedPage>
-  );
+  redirect("/admin?tab=analytics");
 }
