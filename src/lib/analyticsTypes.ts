@@ -10,6 +10,19 @@ export type AnalyticsRecord = {
   utmSource: string;
   deviceType: string;
   timestamp: string | null;
+  path?: string;
+  referrer?: string;
+  sessionId?: string | null;
+};
+
+export type EngagementEvent = {
+  id: string;
+  type: "project_open" | "outbound_click" | "scroll" | "engagement";
+  sessionId: string;
+  target: string | null;
+  path: string;
+  durationMs: number | null;
+  timestamp: string | null;
 };
 
 export function formatAnalyticsDate(iso: string | null): string {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAnalyticsAuthenticated } from "@/lib/analyticsAuth";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { MAX_HOSTED_FILES } from "@/lib/hosted";
 import { hostedDoc, isSameOrigin } from "@/lib/hostedServer";
 
@@ -9,7 +9,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAnalyticsAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!isSameOrigin(req)) {
@@ -34,6 +34,10 @@ export async function POST(
     status: "ready",
     fileCount: files.size,
     totalBytes: files.docs.reduce((total, file) => total + file.data().size, 0),
+    ...(item.data()?.kind === "file" ? {
+      previewPath: files.docs[0].data().path,
+      previewContentType: files.docs[0].data().contentType,
+    } : {}),
   });
   return NextResponse.json({ success: true });
 }

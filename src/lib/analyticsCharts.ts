@@ -17,14 +17,14 @@ export type CategoryPoint = {
 };
 
 export const analyticsChartPalette = [
-  "#F37338",
-  "#CF4500",
-  "#141413",
-  "#696969",
-  "#3860BE",
-  "#9A3A0A",
-  "#D1CDC7",
-  "#555555",
+  "#4774D9",
+  "#36A5A0",
+  "#8C7AE6",
+  "#E6A45C",
+  "#7699D7",
+  "#67BDAA",
+  "#A7B7D6",
+  "#6D7892",
 ] as const;
 
 function parseRecordDate(iso: string | null): Date | null {

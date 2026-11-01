@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAnalyticsAuthenticated } from "@/lib/analyticsAuth";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { hostedDoc } from "@/lib/hostedServer";
 import type { HostedDownload } from "@/lib/hosted";
 
@@ -9,7 +9,7 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAnalyticsAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

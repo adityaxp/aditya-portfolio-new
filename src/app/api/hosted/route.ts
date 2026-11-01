@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAnalyticsAuthenticated } from "@/lib/analyticsAuth";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { db } from "@/lib/firebaseAdmin";
 import { HOSTED_COLLECTION } from "@/lib/hosted";
 import { isSameOrigin, serializeHostedItem } from "@/lib/hostedServer";
@@ -7,7 +7,7 @@ import { isSameOrigin, serializeHostedItem } from "@/lib/hostedServer";
 export const runtime = "nodejs";
 
 export async function GET() {
-  if (!(await isAnalyticsAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -16,12 +16,20 @@ export async function GET() {
     .orderBy("createdAt", "desc")
     .get();
   return NextResponse.json({
-    items: snapshot.docs.map((doc) => serializeHostedItem(doc.id, doc.data())),
+    items: await Promise.all(snapshot.docs.map(async (doc) => {
+      const item = serializeHostedItem(doc.id, doc.data());
+      if (item.kind === "file" && item.status === "ready" && !item.previewPath) {
+        const file = await doc.ref.collection("files").limit(1).get();
+        item.previewPath = file.docs[0]?.data().path;
+        item.previewContentType = file.docs[0]?.data().contentType;
+      }
+      return item;
+    })),
   });
 }
 
 export async function POST(req: NextRequest) {
-  if (!(await isAnalyticsAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!isSameOrigin(req)) {

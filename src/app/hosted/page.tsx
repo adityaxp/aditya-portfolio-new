@@ -1,12 +1,5 @@
-"use client";
-
-import ProtectedPage from "@/components/analytics/ProtectedPage";
-import HostedManager from "@/components/hosted/HostedManager";
+import { redirect } from "next/navigation";
 
 export default function HostedAdminPage() {
-  return (
-    <ProtectedPage destination="hosted files">
-      <HostedManager />
-    </ProtectedPage>
-  );
+  redirect("/admin?tab=hosted");
 }

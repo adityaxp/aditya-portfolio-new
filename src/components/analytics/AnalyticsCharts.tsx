@@ -29,6 +29,7 @@ import {
 } from "@/lib/analyticsCharts";
 import { periodLabel, type TimePeriod } from "@/lib/analyticsStats";
 import type { AnalyticsRecord } from "@/lib/analyticsTypes";
+import AdminIcon from "@/components/admin/AdminIcon";
 
 type AnalyticsChartsProps = {
   pageVisits: AnalyticsRecord[];
@@ -79,6 +80,7 @@ function ChartShell({
   emptyMessage,
   isEmpty,
   loading,
+  feature = false,
 }: {
   title: string;
   subtitle?: string;
@@ -86,10 +88,11 @@ function ChartShell({
   emptyMessage: string;
   isEmpty: boolean;
   loading?: boolean;
+  feature?: boolean;
 }) {
   return (
     <motion.div
-      className="flex min-h-[280px] flex-col rounded-xl border border-ink-black/10 bg-lifted-cream p-4 md:p-5"
+      className={`analytics-chart-card flex flex-col rounded-2xl border border-ink-black/10 bg-lifted-cream p-5 md:p-6 ${feature ? "is-feature" : ""} ${isEmpty && !loading ? "is-empty" : ""}`}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
@@ -103,14 +106,17 @@ function ChartShell({
         ) : null}
       </div>
 
-      <div className="min-h-[220px] flex-1">
+      <div className="analytics-chart-content min-h-[220px] flex-1">
         {loading ? (
-          <div className="flex h-full items-center justify-center">
-            <p className="text-sm text-granite">Loading charts…</p>
+          <div className="analytics-chart-skeleton" role="status" aria-label={`Loading ${title}`}>
+            <span className="admin-skeleton admin-skeleton-chart" />
+            <span className="admin-skeleton admin-skeleton-chart-line" />
+            <span className="admin-skeleton admin-skeleton-chart-line is-short" />
           </div>
         ) : isEmpty ? (
-          <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-ink-black/10 bg-canvas-cream/60 px-4">
-            <p className="text-center text-sm text-granite">{emptyMessage}</p>
+          <div className="analytics-chart-empty" role="status">
+            <span className="analytics-chart-empty-icon"><AdminIcon name="chart" size={17} /></span>
+            <p>{emptyMessage}</p>
           </div>
         ) : (
           children
@@ -174,7 +180,7 @@ function DonutCenterLabel({
       <tspan
         x={cx}
         y={cy - 4}
-        fill="#141413"
+        fill="var(--admin-ink)"
         style={{ fontSize: 22, fontWeight: 500 }}
       >
         {total.toLocaleString()}
@@ -182,7 +188,7 @@ function DonutCenterLabel({
       <tspan
         x={cx}
         y={cy + 18}
-        fill="#696969"
+        fill="var(--admin-muted)"
         style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.06em" }}
       >
         TOTAL
@@ -229,44 +235,45 @@ export default function AnalyticsCharts({
   const periodText = periodLabel(period).toLowerCase();
 
   return (
-    <section className="grid shrink-0 gap-4 border-b border-ink-black/10 bg-canvas-cream/50 px-4 py-5 md:px-10 md:py-6 lg:grid-cols-2">
+    <section className="analytics-chart-grid grid shrink-0 gap-4 px-6 pb-6 md:px-10 lg:grid-cols-3">
       <ChartShell
-        title="Traffic over time"
+        title="Traffic trend"
         subtitle={`Page visits and CV downloads · ${periodText}`}
         emptyMessage={`No traffic recorded for ${periodText}.`}
         isEmpty={!hasChartData(trafficSeries)}
         loading={loading}
+        feature
       >
-        <ResponsiveContainer width="100%" height={240}>
+        <ResponsiveContainer width="100%" height={300}>
           <AreaChart
             data={trafficSeries}
             margin={{ top: 8, right: 8, left: -18, bottom: 0 }}
           >
             <defs>
               <linearGradient id="visitsFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F37338" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="#F37338" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#4774d9" stopOpacity={0.32} />
+                <stop offset="100%" stopColor="#4774d9" stopOpacity={0.01} />
               </linearGradient>
               <linearGradient id="downloadsFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#141413" stopOpacity={0.2} />
-                <stop offset="100%" stopColor="#141413" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#36a5a0" stopOpacity={0.2} />
+                <stop offset="100%" stopColor="#36a5a0" stopOpacity={0.01} />
               </linearGradient>
             </defs>
             <CartesianGrid
-              stroke="#141413"
-              strokeOpacity={0.06}
+              stroke="var(--admin-ink)"
+              strokeOpacity={0.08}
               vertical={false}
             />
             <XAxis
               dataKey="label"
-              tick={{ fill: "#696969", fontSize: 11 }}
+              tick={{ fill: "var(--admin-muted)", fontSize: 11 }}
               axisLine={false}
               tickLine={false}
               interval="preserveStartEnd"
             />
             <YAxis
               allowDecimals={false}
-              tick={{ fill: "#696969", fontSize: 11 }}
+              tick={{ fill: "var(--admin-muted)", fontSize: 11 }}
               axisLine={false}
               tickLine={false}
             />
@@ -275,21 +282,21 @@ export default function AnalyticsCharts({
               type="monotone"
               dataKey="visits"
               name="Visits"
-              stroke="#F37338"
+              stroke="#4774d9"
               strokeWidth={2.5}
               fill="url(#visitsFill)"
               dot={false}
-              activeDot={{ r: 4, fill: "#F37338", stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: "#4774d9", stroke: "#fff", strokeWidth: 2 }}
             />
             <Area
               type="monotone"
               dataKey="downloads"
               name="CV downloads"
-              stroke="#141413"
+              stroke="#36a5a0"
               strokeWidth={2}
               fill="url(#downloadsFill)"
               dot={false}
-              activeDot={{ r: 4, fill: "#141413", stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 4, fill: "#36a5a0", stroke: "#fff", strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>
@@ -309,14 +316,14 @@ export default function AnalyticsCharts({
             margin={{ top: 4, right: 12, left: 4, bottom: 0 }}
           >
             <CartesianGrid
-              stroke="#141413"
+              stroke="var(--admin-ink)"
               strokeOpacity={0.06}
               horizontal={false}
             />
             <XAxis
               type="number"
               allowDecimals={false}
-              tick={{ fill: "#696969", fontSize: 11 }}
+              tick={{ fill: "var(--admin-muted)", fontSize: 11 }}
               axisLine={false}
               tickLine={false}
             />
@@ -324,7 +331,7 @@ export default function AnalyticsCharts({
               type="category"
               dataKey="name"
               width={88}
-              tick={{ fill: "#555555", fontSize: 11 }}
+              tick={{ fill: "var(--admin-muted)", fontSize: 11 }}
               axisLine={false}
               tickLine={false}
             />

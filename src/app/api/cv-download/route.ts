@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebaseAdmin";
 import { siteConfig } from "@/lib/constants";
+import { isLocalAnalyticsRequest } from "@/lib/localAnalytics";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+    if (isLocalAnalyticsRequest(req, body.referrer)) return NextResponse.json({ success: true, url: siteConfig.cv, ignored: true });
     const userAgent = req.headers.get("user-agent") || "unknown";
 
     const forwardedFor = req.headers.get("x-forwarded-for");
@@ -37,6 +39,9 @@ export async function POST(req: NextRequest) {
       utmSource: body.utmSource,
 
       deviceType,
+      path: typeof body.path === "string" ? body.path.slice(0, 200) : "/",
+      referrer: typeof body.referrer === "string" ? body.referrer.slice(0, 300) : "direct",
+      sessionId: typeof body.sessionId === "string" ? body.sessionId.slice(0, 64) : null,
       userAgent,
 
       timestamp: new Date(),

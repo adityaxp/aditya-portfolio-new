@@ -4,7 +4,9 @@ import { siteConfig } from "@/lib/constants";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import ClarityInit from "@/components/analytics/ClarityInit";
+import PageVisitTracker from "@/components/analytics/PageVisitTracker";
 import "./globals.css";
+import "./admin/admin-theme.css";
 
 const sofiaSans = Sofia_Sans({
   subsets: ["latin"],
@@ -44,6 +46,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         {children}
+        <PageVisitTracker />
         <ClarityInit projectId={clarityProjectId} />
         <Analytics />
         <SpeedInsights />
