@@ -29,7 +29,7 @@ export async function GET(
   }
 
   const inline = req.nextUrl.searchParams.get("inline") === "1" &&
-    (file.contentType === "application/pdf" || file.contentType.startsWith("image/"));
+    (file.contentType === "application/pdf" || file.contentType.startsWith("image/") || file.contentType.startsWith("video/"));
   const filename = path.split("/").at(-1) || "download";
   const safeFilename = filename.replace(/["\\\r\n]/g, "_");
   const [url] = await storageBucket.file(file.storagePath).getSignedUrl({
