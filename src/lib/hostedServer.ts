@@ -27,6 +27,8 @@ export function serializeHostedItem(
     totalBytes: data.totalBytes ?? 0,
     downloadCount: data.downloadCount ?? 0,
     createdAt: data.createdAt?.toDate?.().toISOString() ?? "",
+    previewPath: data.previewPath,
+    previewContentType: data.previewContentType,
   };
 }
 
