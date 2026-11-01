@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { isAnalyticsAuthenticated } from "@/lib/analyticsAuth";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { storageBucket } from "@/lib/firebaseAdmin";
 import { hostedDoc, isSameOrigin } from "@/lib/hostedServer";
 
@@ -9,7 +9,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  if (!(await isAnalyticsAuthenticated())) {
+  if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!isSameOrigin(req)) {
