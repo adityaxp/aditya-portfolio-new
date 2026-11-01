@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { isAnalyticsAuthenticated } from "@/lib/analyticsAuth";
+import { isAdminAuthenticated } from "@/lib/adminAuth";
 import { mapAnalyticsDoc } from "@/lib/analyticsFirestore";
 import { db } from "@/lib/firebaseAdmin";
 
 export async function GET() {
   try {
-    if (!(await isAnalyticsAuthenticated())) {
+    if (!(await isAdminAuthenticated())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
