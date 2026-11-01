@@ -11,6 +11,7 @@ import ProjectModal, {
 } from "@/components/ui/ProjectModal";
 import { projects } from "@/lib/constants";
 import EyebrowLabel from "@/components/ui/EyebrowLabel";
+import { trackPortfolioEvent } from "@/lib/clientAnalytics";
 
 function projectHasLink(link: string) {
   const trimmed = link.trim();
@@ -31,6 +32,7 @@ export default function Projects() {
     useState<ProjectModalData | null>(null);
 
   const openProject = useCallback((project: (typeof projects)[number]) => {
+    trackPortfolioEvent("project_open", project.title);
     setSelectedProject({
       title: project.title,
       category: project.category,
